@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Csp.Compiler/Csp.Compiler.csproj" />
+  <Project Path="Csp.Sample/Csp.Sample.csproj" />
+</Solution>

@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+*.log
+*.dll
+*.exe
+*.pdb
+
+# Rider / JetBrains
+.idea/
+
+# dotnet artifacts
+*.nupkg
