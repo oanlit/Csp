@@ -9,7 +9,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Csp.Test</RootNamespace>
+    <RootNamespace>Csp.Sample</RootNamespace>
+    <AssemblyName>csp</AssemblyName>
   </PropertyGroup>
 
 </Project>

@@ -1,0 +1,31 @@
+using System.Diagnostics;
+
+public static class Demo
+{
+    public static void PrintDemo(string text)
+    {
+        alias print = Console.WriteLine;
+        print($"[Button] {text}");
+    }
+    
+    public static void DateTimeDemo()
+    {
+        alias now = DateTime.Now.ToString;
+
+        Console.WriteLine(now());
+        Console.WriteLine(now());
+    }
+    
+    public static void ScopeDemo()
+    {
+        alias print = Console.WriteLine;
+
+        print("User log");
+
+        {
+            alias print = Debug.WriteLine;
+
+            print("Debug log");
+        }
+    }
+}
