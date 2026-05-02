@@ -17,6 +17,14 @@ public static class Demo
         print(now());
     }
     
+    public static void ExpressionContextDemo()
+    {
+        def now = DateTime.Now.ToString;
+        
+        var f = now;
+        var s = now();
+    }
+    
     public static void ScopeDemo()
     {
         def print = Console.WriteLine;
@@ -28,5 +36,13 @@ public static class Demo
 
             print("Debug log");
         }
+    }
+    
+    public static void RecursiveMacroDemo()
+    {
+        def a = b;
+        def b = a;
+        
+        a();
     }
 }

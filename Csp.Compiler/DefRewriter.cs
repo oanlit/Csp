@@ -7,6 +7,7 @@ namespace Csp.Compiler;
 public class DefRewriter : CSharpSyntaxRewriter
 {
     private readonly Stack<Dictionary<string, ExpressionSyntax>> _scopes = new();
+    private readonly HashSet<string> _resolving = new();
 
     public DefRewriter()
     {
@@ -40,7 +41,10 @@ public class DefRewriter : CSharpSyntaxRewriter
                 continue;
 
             var name = v.Identifier.Text;
+
             var expr = v.Initializer.Value;
+            if (ContainsUnresolvedAlias(expr))
+                throw CreateError($"Circular alias detected: '{name}'", node);
 
             _scopes.Peek()[name] = expr;
         }
@@ -48,19 +52,24 @@ public class DefRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.ParseStatement("//"); // delete def
     }
 
-    // replacement call
-    public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
-        var visited = (InvocationExpressionSyntax?)base.VisitInvocationExpression(node);
-        if (visited?.Expression is not IdentifierNameSyntax id)
-            return visited;
-
-        var name = id.Identifier.Text;
+        var name = node.Identifier.Text;
         var expr = Resolve(name);
 
-        return expr is null
-            ? visited
-            : visited.WithExpression((ExpressionSyntax)Visit(expr));
+        if (expr is null)
+            return base.VisitIdentifierName(node);
+
+        if (_resolving.Contains(name))
+            throw CreateError($"Circular alias detected: '{name}'", node);
+
+        _resolving.Add(name);
+
+        var result = Visit(expr);
+
+        _resolving.Remove(name);
+
+        return result;
     }
 
     // Analysis of def (from inside to outside)
@@ -73,5 +82,42 @@ public class DefRewriter : CSharpSyntaxRewriter
         }
 
         return null;
+    }
+
+    private bool IsAliasName(string name)
+    {
+        foreach (var scope in _scopes)
+        {
+            if (scope.TryGetValue(name, out _))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool ContainsUnresolvedAlias(ExpressionSyntax expr)
+    {
+        var identifiers = expr.DescendantNodesAndSelf()
+            .OfType<IdentifierNameSyntax>();
+
+        foreach (var id in identifiers)
+        {
+            if (Resolve(id.Identifier.Text) is not null)
+                continue;
+
+            if (IsAliasName(id.Identifier.Text))
+                return true;
+        }
+
+        return false;
+    }
+    
+    private Exception CreateError(string message, SyntaxNode node)
+    {
+        var span = node.GetLocation().GetLineSpan();
+        var line = span.StartLinePosition.Line + 1;
+        var col = span.StartLinePosition.Character + 1;
+
+        return new Exception($"{message} (Line {line}, Column {col})");
     }
 }
