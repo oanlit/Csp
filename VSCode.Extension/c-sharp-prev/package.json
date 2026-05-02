@@ -1,0 +1,44 @@
+{
+  "name": "c-sharp-prev",
+  "displayName": "C Sharp Prev",
+  "description": "C# compile-time macro layer with def syntax",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.118.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oanlit/Csp"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "csp",
+        "aliases": [
+          "CSP"
+        ],
+        "extensions": [
+          ".csp"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "csp",
+        "scopeName": "source.csp",
+        "path": "./syntaxes/csp.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "CSP Theme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/csp-color-theme.json"
+      }
+    ]
+  }
+}

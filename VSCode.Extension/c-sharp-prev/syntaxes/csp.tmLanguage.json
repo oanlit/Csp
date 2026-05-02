@@ -1,0 +1,23 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Csp",
+	"scopeName": "source.csp",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "source.cs"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.csp.def",
+					"match": "\\bdef\\b"
+				}
+			]
+		}
+	}
+}
