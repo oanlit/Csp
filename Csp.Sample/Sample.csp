@@ -2,28 +2,29 @@ using System.Diagnostics;
 
 public static class Demo
 {
-    public static void PrintDemo(string text)
+    public static void BasicInvocationDemo(string text)
     {
-        alias print = Console.WriteLine;
+        def print = Console.WriteLine;
         print($"[Button] {text}");
     }
     
-    public static void DateTimeDemo()
+    public static void NestedInvocationDemo()
     {
-        alias now = DateTime.Now.ToString;
+        def print = Console.WriteLine;
+        def now = DateTime.Now.ToString;
 
-        Console.WriteLine(now());
-        Console.WriteLine(now());
+        print(now());
+        print(now());
     }
     
     public static void ScopeDemo()
     {
-        alias print = Console.WriteLine;
+        def print = Console.WriteLine;
 
         print("User log");
 
         {
-            alias print = Debug.WriteLine;
+            def print = Debug.WriteLine;
 
             print("Debug log");
         }

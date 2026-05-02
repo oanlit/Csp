@@ -2,16 +2,18 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-public class AliasRewriter : CSharpSyntaxRewriter
+namespace Csp.Compiler;
+
+public class DefRewriter : CSharpSyntaxRewriter
 {
     private readonly Stack<Dictionary<string, ExpressionSyntax>> _scopes = new();
 
-    public AliasRewriter()
+    public DefRewriter()
     {
         _scopes.Push(new()); // global scope
     }
 
-    // ✔ 进入 block
+    // enter block
     public override SyntaxNode? VisitBlock(BlockSyntax node)
     {
         _scopes.Push(new());
@@ -23,13 +25,13 @@ public class AliasRewriter : CSharpSyntaxRewriter
         return result;
     }
 
-    // handle alias declaration and deletion
+    // handle def declaration and deletion
     public override SyntaxNode? VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
     {
         var decl = node.Declaration;
 
-        // determine alias
-        if (decl.Type.ToString() != "alias")
+        // determine def
+        if (decl.Type.ToString() != "def")
             return base.VisitLocalDeclarationStatement(node);
 
         foreach (var v in decl.Variables)
@@ -42,24 +44,26 @@ public class AliasRewriter : CSharpSyntaxRewriter
 
             _scopes.Peek()[name] = expr;
         }
-        return SyntaxFactory.ParseStatement("//"); // delete alias
+
+        return SyntaxFactory.ParseStatement("//"); // delete def
     }
 
     // replacement call
     public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
     {
-        if (node.Expression is not IdentifierNameSyntax id)
-            return base.VisitInvocationExpression(node);
+        var visited = (InvocationExpressionSyntax?)base.VisitInvocationExpression(node);
+        if (visited?.Expression is not IdentifierNameSyntax id)
+            return visited;
 
         var name = id.Identifier.Text;
         var expr = Resolve(name);
 
         return expr is null
-            ? base.VisitInvocationExpression(node)
-            : node.WithExpression(expr);
+            ? visited
+            : visited.WithExpression((ExpressionSyntax)Visit(expr));
     }
 
-    // Analysis of alias (from inside to outside)
+    // Analysis of def (from inside to outside)
     private ExpressionSyntax? Resolve(string name)
     {
         foreach (var scope in _scopes)

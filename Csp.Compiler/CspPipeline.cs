@@ -10,7 +10,7 @@ public static class CspPipeline
         var tree = CSharpSyntaxTree.ParseText(source);
         var root = tree.GetRoot();
 
-        var rewritten = new AliasRewriter().Visit(root);
+        var rewritten = new DefRewriter().Visit(root);
 
         return rewritten.NormalizeWhitespace().ToFullString();
     }
