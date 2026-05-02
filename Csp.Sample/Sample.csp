@@ -17,12 +17,32 @@ public static class Demo
         print(now());
     }
     
+    public static void BasicPathMacroDemo()
+    {
+        def write = System.Console.WriteLine;
+    
+        def now = System.DateTime.Now;
+        def ticks = System.DateTime.Now.Ticks;
+    
+        write("Hello CSP");
+        write(now.ToString());
+        write(ticks.ToString());
+    }
+    
     public static void ExpressionContextDemo()
     {
         def now = DateTime.Now.ToString;
         
         var f = now;
         var s = now();
+    }
+    
+    public static void LambdaExpressionInvocationDemo()
+    {
+        def write = System.Console.WriteLine;
+        def add = () => 1 + 2;
+        
+        write(add());
     }
     
     public static void ScopeDemo()
@@ -38,11 +58,11 @@ public static class Demo
         }
     }
     
-    public static void RecursiveMacroDemo()
-    {
-        def a = b;
-        def b = a;
+    // public static void RecursiveMacroDemo()
+    // {
+    //     def a = b;
+    //     def b = a;
         
-        a();
-    }
+    //     a();
+    // }
 }

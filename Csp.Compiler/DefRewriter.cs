@@ -72,6 +72,23 @@ public class DefRewriter : CSharpSyntaxRewriter
         return result;
     }
 
+    public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
+    {
+        var visited = (InvocationExpressionSyntax?)base.VisitInvocationExpression(node);
+
+        if (visited is null)
+            return null;
+
+        // Only handle cases where the expression is a lambda and is not wrapped.
+        if (visited.Expression is not LambdaExpressionSyntax lambda
+            || lambda.Parent is ParenthesizedExpressionSyntax)
+            return visited;
+
+        return visited.WithExpression(
+            SyntaxFactory.ParenthesizedExpression(lambda)
+        );
+    }
+
     // Analysis of def (from inside to outside)
     private ExpressionSyntax? Resolve(string name)
     {
@@ -111,7 +128,7 @@ public class DefRewriter : CSharpSyntaxRewriter
 
         return false;
     }
-    
+
     private Exception CreateError(string message, SyntaxNode node)
     {
         var span = node.GetLocation().GetLineSpan();

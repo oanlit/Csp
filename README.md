@@ -1,230 +1,114 @@
 # Csp
 
-**Csp** is a lightweight compile-time extension layer for C#, built on top of Roslyn.
+**Csp introduces compile-time language extensions for C#.**
 
-It introduces new syntax (such as `alias`) that enables **scoped, zero-cost code transformations**, while still producing valid standard C#.
-
----
-
-## ✨ Overview
-
-Csp works as a **source-to-source compiler**:
-
-```text
-.csp → transform → .cs
-```
-
-All features are resolved at compile time.
-The generated output is pure C# with no runtime dependency.
+It allows new syntax constructs that are transformed into standard C# code during compilation.
 
 ---
 
-## 🎯 Motivation
+# 🎯 Goal
 
-C# provides a powerful and expressive programming model.
-In practice, there are scenarios where developers may want:
-
-* shorter names for long expressions
-* localized, intention-revealing aliases
-* lightweight DSL-like structures
-* compile-time substitution without runtime cost
-
-Csp explores these patterns as an optional layer on top of C#.
+Csp enables writing **more expressive C# code** by introducing lightweight syntax extensions that are resolved at compile time.
 
 ---
 
-## ✨ Features
+# ✨ Current Feature: `def`
 
-### 🔹 `alias` — Scoped Compile-Time Substitution
+`def` defines a **compile-time expression replacement rule**.
 
-Define a name that is replaced at compile time.
+---
 
-```csharp
-alias print = Console.WriteLine;
+## 🔹 Basic usage
+
+```csharp id="m7q8zv"
+def print = Console.WriteLine;
 
 print("Hello");
 ```
 
-↓
+### ↓ becomes
 
-```csharp
+```csharp id="x2n4kd"
 Console.WriteLine("Hello");
 ```
 
 ---
 
-### 🔹 Scoped & Shadowable
+## 🔹 Expression support
 
-```csharp
-alias print = Console.WriteLine;
+`def` works with arbitrary expressions:
 
-print("User log");
-
-{
-    alias print = Debug.WriteLine;
-    print("Debug log");
-}
-```
-
-↓
-
-```csharp
-Console.WriteLine("User log");
-
-{
-    Debug.WriteLine("Debug log");
-}
+```csharp id="q9k1pm"
+def now = DateTime.Now.ToString;
+def add = () => 1 + 2;
 ```
 
 ---
 
-### 🔹 Expression-Level Mapping
+## 🔹 Usage
 
-```csharp
-alias now = DateTime.Now.ToString;
-
+```csharp id="r4v8dn"
 Console.WriteLine(now());
-```
-
-↓
-
-```csharp
-Console.WriteLine(DateTime.Now.ToString());
+Console.WriteLine(add());
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🔹 Scoped behavior
 
-### 1. Create a `.csp` file
+```csharp id="z1k7qp"
+def log = Console.WriteLine;
 
-```csharp
-using System.Diagnostics;
+log("global");
 
-public static class Demo
 {
-    public static void PrintDemo(string text)
-    {
-        alias print = Console.WriteLine;
-        print($"[Button] {text}");
-    }
-
-    public static void CallDemo()
-    {
-        alias now = DateTime.Now.ToString;
-
-        Console.WriteLine(now());
-        Console.WriteLine(now());
-    }
-
-    public static void ScopeDemo()
-    {
-        alias print = Console.WriteLine;
-
-        print("User log");
-
-        {
-            alias print = Debug.WriteLine;
-            print("Debug log");
-        }
-    }
+    def log = Debug.WriteLine;
+    log("inner");
 }
 ```
 
 ---
 
-### 2. Run the compiler
+## 🔹 Restrictions
 
-```bash
-csp Sample.csp
-```
-
-or specify output:
-
-```bash
-csp Sample.csp -o Sample.cs
-```
+* Forward references are not allowed
+* Circular references are not allowed
+* Expansion happens at compile time
+* Generated output is valid C#
 
 ---
 
-### 3. Generated output
+# 🧠 Important Note
 
-```csharp
-using System.Diagnostics;
+Csp does not change runtime semantics.
 
-public static class Demo
-{
-    public static void PrintDemo(string text)
-    {
-        Console.WriteLine($"[Button] {text}");
-    }
-
-    public static void CallDemo()
-    {
-        Console.WriteLine(DateTime.Now.ToString());
-        Console.WriteLine(DateTime.Now.ToString());
-    }
-
-    public static void ScopeDemo()
-    {
-        Console.WriteLine("User log");
-        {
-            Debug.WriteLine("Debug log");
-        }
-    }
-}
-```
+It only transforms syntax before compilation.
 
 ---
 
-## 💡 What Makes `alias` Different?
+# 🚀 Future extensions
 
-| Feature                  | alias   | variable  | delegate  | using    |
-| ------------------------ | ------- | --------- | --------- | -------- |
-| Scope                    | ✔ local | ✔ local   | ✔ local   | ✖ global |
-| Runtime cost             | ✔ none  | ✖ yes     | ✖ yes     | ✔ none   |
-| Works for expressions    | ✔ yes   | ✔ limited | ✔ limited | ✖ no     |
-| Compile-time replacement | ✔ yes   | ✖ no      | ✖ no      | ✖ no     |
+Csp may introduce additional compile-time syntax constructs beyond `def`.
 
----
+These will follow the same principle:
 
-## 🛠 How It Works
-
-1. Parse `.csp` using Roslyn
-2. Collect `alias` declarations into scoped maps
-3. Rewrite syntax tree (identifier / invocation)
-4. Remove `alias` statements
-5. Format and output valid C#
+> **compile-time transformation into valid C#**
 
 ---
 
-## ⚠️ Limitations
-
-* `alias` is not valid C# syntax (requires preprocessing)
-* Currently syntax-level only (no semantic analysis)
-* Recursive alias not yet supported
-* Not all expression positions are covered yet
-
----
-
-## 🔮 Future Plans
-
-* Recursive alias expansion
-* Full expression replacement
-* Project integration (`.csproj`)
-* Watch mode
-* IDE support (Roslyn analyzer)
-
----
-
-## 📦 CLI
+# 📦 CLI
 
 ```bash
 csp input.csp
-csp input.csp -o output.cs
-csp input.csp -o ./out/
 ```
-
+or
+```bash
+csp input.csp -o output.cs
+```
+or
+```bash
+csp input.csp -o ./out/output.cs
+```
 ---
 
 ## 📄 License
